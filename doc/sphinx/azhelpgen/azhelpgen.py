@@ -10,10 +10,10 @@ from docutils.statemachine import ViewList
 from sphinx.util.compat import Directive
 from sphinx.util.nodes import nested_parse_with_titles
 
-from azure.cli.core.application import APPLICATION, Configuration
+from azure.cli.core.application import Application, Configuration
 import azure.cli.core._help as _help
 
-app = APPLICATION
+app = Application(Configuration())
 for cmd in app.configuration.get_command_table():
     try:
         app.execute(cmd.split() + ['-h'])
@@ -30,7 +30,7 @@ class AzHelpGenDirective(Directive):
 
         help_files = []
         for cmd, parser in parser_dict.items():
-            help_file = _help.GroupHelpFile(cmd, parser) if _is_group(parser) else _help.CommandHelpFile(cmd, parser) 
+            help_file = _help.GroupHelpFile(cmd, parser) if _is_group(parser) else _help.CommandHelpFile(cmd, parser)
             help_file.load(parser)
             help_files.append(help_file)
         help_files = sorted(help_files, key=lambda x: x.command)
@@ -42,7 +42,7 @@ class AzHelpGenDirective(Directive):
             yield '{}:summary: {}'.format(INDENT, help_file.short_summary)
             yield '{}:description: {}'.format(INDENT, help_file.long_summary)
             if not is_command:
-                top_group_name = help_file.command.split()[0] if help_file.command else 'az' 
+                top_group_name = help_file.command.split()[0] if help_file.command else 'az'
                 yield '{}:docsource: {}'.format(INDENT, doc_source_map[top_group_name] if top_group_name in doc_source_map else '')
             else:
                 top_command_name = help_file.command.split()[0] if help_file.command else ''
@@ -52,7 +52,7 @@ class AzHelpGenDirective(Directive):
 
             if is_command and help_file.parameters:
                group_registry = _help.ArgumentGroupRegistry(
-                  [p.group_name for p in help_file.parameters if p.group_name]) 
+                  [p.group_name for p in help_file.parameters if p.group_name])
 
                for arg in sorted(help_file.parameters,
                                 key=lambda p: group_registry.get_group_priority(p.group_name)
