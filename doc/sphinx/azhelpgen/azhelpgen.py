@@ -31,7 +31,10 @@ class AzHelpGenDirective(Directive):
         help_files = []
         for cmd, parser in parser_dict.items():
             help_file = _help.GroupHelpFile(cmd, parser) if _is_group(parser) else _help.CommandHelpFile(cmd, parser)
-            help_file.load(parser)
+            try:
+                help_file.load(parser)
+            except Exception as ex:
+                print(ex)
             help_files.append(help_file)
         help_files = sorted(help_files, key=lambda x: x.command)
 
